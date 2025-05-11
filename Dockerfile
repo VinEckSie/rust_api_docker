@@ -1,22 +1,21 @@
-# 1. Build stage
-FROM rust:1.86.0-slim-bullseye as builder
+#Stage 1: build stage
+FROM rust:1.86.0-bullseye AS builder
 
 WORKDIR /app
 
-# Copy and build dependencies first
-COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
-
-# Now copy full source and rebuild
+# Copy entire source (Cargo.toml + src/)
 COPY . .
+
+# Build in release mode
 RUN cargo build --release
 
-# 2. Runtime stage
-FROM debian:bullseye-slim
+#Stage 2: run stage
+FROM rust:1.86.0-bullseye
 
-COPY --from=builder /app/target/release/rust_api_docker /usr/local/bin/rust_api_docker
+WORKDIR /usr/local/bin
+COPY --from=builder /app/target/release/rust_api_docker .
 
+RUN chmod +x rust_api_docker
 
-CMD ["rust_api_docker"]
 EXPOSE 8080
+CMD ["./rust_api_docker"]
