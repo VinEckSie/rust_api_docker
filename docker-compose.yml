@@ -4,6 +4,8 @@ services:
   api:
     build:
       context: .
+      dockerfile: Dockerfile.dev  # or Dockerfile for prod
+      image: rust_api_docker:v1
     ports:
       - "8080:8080"
     depends_on:
